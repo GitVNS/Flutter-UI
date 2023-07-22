@@ -44,11 +44,11 @@ class _DashboardState extends State<Dashboard> {
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: const [
-          Home(key: PageStorageKey("home")),
-          Learn(key: PageStorageKey("learn")),
-          Hub(key: PageStorageKey("hub")),
-          Chat(key: PageStorageKey("chat")),
-          Profile(key: PageStorageKey("profile")),
+          Home(),
+          Learn(),
+          Hub(),
+          Chat(),
+          Profile(),
         ], //
       ),
     );
