@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:routine/controllers/lessons_controller.dart';
+import 'package:routine/models/lessons.dart';
+import 'package:routine/ui/components/lessons_presenter_dashboard.dart';
+import 'package:routine/ui/components/programs_presenter_dashboard.dart';
+import 'package:routine/ui/screens/lessons_screen.dart';
+import 'package:routine/ui/screens/programs_screen.dart';
 
-import '../../data/leanings_data.dart';
+import '../../controllers/programs_controller.dart';
+import '../../models/programs.dart';
 import '../../utils/app_colors.dart';
 import '../animations/tap_bounce.dart';
-import '../components/learnings_widget.dart';
 import '../components/space.dart';
 
 class Home extends StatefulWidget {
@@ -16,6 +22,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  ProgramsController programsController = ProgramsController();
+  LessonsController lessonsController = LessonsController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,17 +35,68 @@ class _HomeState extends State<Home> {
           appbar(),
           SliverList(
             delegate: SliverChildBuilderDelegate(
+              childCount: 1,
               (context, index) => Container(
                 color: Colors.white,
-                child: ListView.builder(
-                    itemCount: learningsData.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 24),
-                    itemBuilder: ((context, index) =>
-                        LearningsWidget(learnings: learningsData[index]))),
+                child: Column(
+                  children: [
+                    FutureBuilder(
+                      future: programsController.getPrograms(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.hasData) {
+                            Programs programs = snapshot.data!;
+                            return ProgramsPresenterDashboard(
+                              onViewAllTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (builder) =>
+                                        const ProgramsScreen()));
+                              },
+                              programs: programs,
+                            );
+                          }
+                        }
+                        return Container(
+                          height: 240,
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          child: const CircularProgressIndicator(
+                            color: AppColors.primary,
+                            strokeWidth: 2,
+                          ),
+                        );
+                      },
+                    ),
+                    FutureBuilder(
+                      future: lessonsController.getLessons(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.hasData) {
+                            Lessons lessons = snapshot.data!;
+                            return LessonsPresenterDashboard(
+                              onViewAllTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (builder) =>
+                                        const LessonsScreen()));
+                              },
+                              lessons: lessons,
+                            );
+                          }
+                        }
+                        return Container(
+                          height: 240,
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          child: const CircularProgressIndicator(
+                            color: AppColors.primary,
+                            strokeWidth: 2,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-              childCount: 1,
             ),
           ),
         ],
@@ -102,7 +162,10 @@ class _HomeState extends State<Home> {
               outlinedButton(
                   title: "Programs",
                   icon: SvgPicture.asset("assets/icons/ic_program.svg"),
-                  onTap: () {}),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (builder) => const ProgramsScreen()));
+                  }),
               const Space(horizontal: 8),
               outlinedButton(
                 title: "Get help",
